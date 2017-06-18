@@ -28,6 +28,9 @@ public class EchoServer {
 
             String inputLine;
             while ((inputLine = socketIn.readLine()) != null) {
+                System.out.println("Client: " + inputLine);
+                System.out.println("Echoing to client...");
+                System.out.println("Server: " + inputLine);
                 socketOut.println(inputLine);
             }
         }

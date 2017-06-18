@@ -17,6 +17,11 @@ public class EchoClient {
         System.exit(1);
     }
 
+    public static void promptUser() {
+        System.out.println("Enter a line to send to the server: ");
+        System.out.print("Client: ");
+    }
+
     public static void main(String[] args) {
         if (args.length != 2) {
             System.err.println("Usage: java EchoClient <host_name> <port_number>");
@@ -33,9 +38,11 @@ public class EchoClient {
             BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
 
             String userInput;
+            promptUser();
             while ((userInput = stdIn.readLine()) != null) {
                 socketOut.println(userInput);
-                System.out.println("echo: " + socketIn.readLine());
+                System.out.println("Server: " + socketIn.readLine());
+                promptUser();
             }
         }
         catch (UnknownHostException e) {
