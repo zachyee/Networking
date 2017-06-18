@@ -4,6 +4,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by Zachary on 6/18/2017.
@@ -13,9 +14,11 @@ import java.net.Socket;
 public class MultiEchoServer {
     private class ConnectionHandler implements Runnable {
         Socket clientSocket;
+        int connectionNumber;
 
-        public ConnectionHandler(Socket clientSocket) {
+        public ConnectionHandler(Socket clientSocket, int connectionNumber) {
             this.clientSocket = clientSocket;
+            this.connectionNumber = connectionNumber;
         }
 
         public void run() {
@@ -25,7 +28,7 @@ public class MultiEchoServer {
 
                 String inputLine;
                 while ((inputLine = socketIn.readLine()) != null) {
-                    System.out.println("Client: " + inputLine);
+                    System.out.println("Client " + connectionNumber + ": " + inputLine);
                     System.out.println("Echoing to client...");
                     System.out.println("Server: " + inputLine);
                     socketOut.println(inputLine);
@@ -35,6 +38,22 @@ public class MultiEchoServer {
                 System.err.println(e.getStackTrace());
                 System.err.println("Exception while listening to port " + clientSocket.getPort());
             }
+        }
+    }
+
+    private static final int maxConnections = 10;
+    private static int numberConnections = 0;
+    private static final Object lock = new Object();
+
+    private static void incrementConnectionNumber() {
+        synchronized (lock) {
+            numberConnections = (numberConnections + 1) % maxConnections;
+        }
+    }
+
+    private static int getConnectionNumber() {
+        synchronized (lock) {
+            return numberConnections;
         }
     }
 
@@ -50,7 +69,9 @@ public class MultiEchoServer {
 
         while (true) {
             Socket clientSocket = serverSocket.accept();
-            ConnectionHandler connectionHandler = new MultiEchoServer().new ConnectionHandler(clientSocket);
+            incrementConnectionNumber();
+            ConnectionHandler connectionHandler = new MultiEchoServer().new ConnectionHandler(clientSocket,
+                    getConnectionNumber());
             Thread clientThread = new Thread(connectionHandler);
             clientThread.start();
         }
