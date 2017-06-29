@@ -4,7 +4,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by Zachary on 6/18/2017.
@@ -67,13 +66,20 @@ public class MultiEchoServer {
 
         ServerSocket serverSocket = new ServerSocket(portNumber);
 
-        while (true) {
-            Socket clientSocket = serverSocket.accept();
-            incrementConnectionNumber();
-            ConnectionHandler connectionHandler = new MultiEchoServer().new ConnectionHandler(clientSocket,
-                    getConnectionNumber());
-            Thread clientThread = new Thread(connectionHandler);
-            clientThread.start();
+        try {
+            while (true) {
+                Socket clientSocket = serverSocket.accept();
+                incrementConnectionNumber();
+                ConnectionHandler connectionHandler = new MultiEchoServer().new ConnectionHandler(clientSocket,
+                        getConnectionNumber());
+                Thread clientThread = new Thread(connectionHandler);
+                clientThread.start();
+            }
+        }
+        finally {
+            if (serverSocket != null) {
+                serverSocket.close();
+            }
         }
     }
 }

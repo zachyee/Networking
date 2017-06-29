@@ -32,6 +32,8 @@ public class EchoServer {
                 System.out.println("Server: " + inputLine);
                 socketOut.println(inputLine);
             }
+
+            serverSocket.close();
         }
         catch (IOException e) {
             System.err.println(e.getStackTrace());
